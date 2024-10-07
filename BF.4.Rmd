@@ -1,0 +1,99 @@
+---
+title: "BF.4"
+output: html_document
+date: "2024-10-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+
+library(readxl)
+library(ggplot2)
+library(dplyr)
+
+file_path <- "C://Users//mansi gopani//Downloads//final_bf.xlsx"
+data <- read_excel(file_path)
+head(data)
+
+Monthlybeerproduction<-ts(data$Monthlybeerproduction)
+library(fpp)
+library(fpp2)
+library(TTR)
+
+attributes(Monthlybeerproduction)
+plot(Monthlybeerproduction)
+Acf(Monthlybeerproduction)
+
+#take Mean of all available history
+
+mean_forecast <- meanf(Monthlybeerproduction,5)
+plot(mean_forecast)
+
+# Naive
+naive_forecast <- naive(Monthlybeerproduction,5)
+plot(naive_forecast)
+
+# Random Walk
+rwf_forecast <- rwf(Monthlybeerproduction,5)
+rwf_forecast <- rwf(Monthlybeerproduction,5, drift=TRUE)
+# Seasonal Naive
+snaive_forecast <- snaive(Monthlybeerproduction,5)
+
+# Moving Averages
+
+MA5_forecast <- ma(Monthlybeerproduction,order=5)
+MA9_forecast <- ma(Monthlybeerproduction,order=9)
+
+
+
+attributes(naive_forecast)
+
+# Decomposition
+ets_forecast <- ets(Monthlybeerproduction)
+plot(ets_forecast)
+attributes(ets_forecast)
+ets_forecast$mse
+
+# HoltWinters
+HW_forecast <- HoltWinters(Monthlybeerproduction,beta=FALSE,gamma=FALSE)
+plot(HW_forecast)
+SSE_Simple <- HoltWinters(Monthlybeerproduction,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+head(SSE_Simple$fitted)
+
+#Forecast
+forecast_ets_1 <- forecast.ets(ets_forecast, h=5)
+plot(forecast_ets_1)
+forecast_ets_2 <- forecast(ets_forecast, h=5)
+plot(forecast_ets_2)
+
+# plot all in a single chart
+plot(mean_forecast)
+lines(naive_forecast$mean,col="purple")
+lines(rwf_forecast$mean,col="orange")
+lines(snaive_forecast$mean,col="yellow")
+lines(MA5_forecast,col="red")
+lines(MA9_forecast,col="green")
+lines(HW_forecast$mean,col="blue")
+lines(ets_forecast$mean,col="pink")
+
+#finding accuricies
+
+accuracy(mean_forecast)
+accuracy(naive_forecast)
+accuracy(rwf_forecast)
+accuracy(snaive_forecast)
+accuracy(ets_forecast)
+
+```
